@@ -1,0 +1,2 @@
+__crc_pstore_register = 0x5b026b04;
+__crc_pstore_unregister = 0xa7bedac8;

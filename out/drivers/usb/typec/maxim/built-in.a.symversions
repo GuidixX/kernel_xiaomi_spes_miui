@@ -1,0 +1,8 @@
+__crc_max77729_usbc_icurr = 0x8c3939d0;
+__crc_max77729_set_fw_noautoibus = 0xb781852c;
+__crc_usbpd_fetch_pdo = 0x64f14b03;
+__crc_usbpd_select_pdo_maxim = 0xb92999ab;
+__crc_blocking_auto_vbus_control = 0xe8112a6a;
+__crc_check_usbc_opcode_queue = 0x80452937;
+__crc_max_adapter_device_register = 0x7c971248;
+__crc_max_adapter_device_unregister = 0xcb8a3c75;

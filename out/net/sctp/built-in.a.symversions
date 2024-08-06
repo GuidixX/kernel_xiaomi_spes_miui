@@ -1,0 +1,5 @@
+__crc_sctp_get_sctp_info = 0x9d7506b8;
+__crc_sctp_for_each_endpoint = 0x911cdce5;
+__crc_sctp_transport_lookup_process = 0xed9e191b;
+__crc_sctp_transport_traverse_process = 0x70e75e1d;
+__crc_sctp_do_peeloff = 0x4eb8c471;

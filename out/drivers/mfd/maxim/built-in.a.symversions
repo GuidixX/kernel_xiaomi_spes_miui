@@ -1,0 +1,10 @@
+__crc_max77729_read_reg = 0x94e09e4d;
+__crc_max77729_bulk_read = 0x1a1ca332;
+__crc_max77729_read_word = 0xe3b84eaf;
+__crc_max77729_write_reg = 0x259d02d5;
+__crc_max77729_write_reg_nolock = 0x3c4c01a7;
+__crc_max77729_bulk_write = 0xae255f75;
+__crc_max77729_write_word = 0x7aa75836;
+__crc_max77729_update_reg = 0x3e1410e3;
+__crc_max77729_usbc_fw_update = 0x4ff1c715;
+__crc_max77729_usbc_fw_setting = 0x03a19565;

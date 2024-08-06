@@ -683,3 +683,11 @@ config ANT_CHECK_DIV
          peripheral. The MISC peripheral holds the USB ID interrupt
          and the driver provides an API to check if this interrupt
          is available on the current PMIC chip.
+
+config FLASHLIGHT_TEST
+    tristate "Flashlight driver with sysfs interface"
+    depends on GPIOLIB
+    help
+      This is a flashlight driver with sysfs interface to turn on and off
+      the flashlight using GPIOs.
+
