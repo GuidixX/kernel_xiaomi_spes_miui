@@ -138,31 +138,31 @@ static int sc8551_mode_data[] = {
 #define sc_err(fmt, ...)								\
 do {											\
 	if (sc->mode == SC8551_ROLE_MASTER)						\
-		(KERN_ERR "[sc8551-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
+		printk(KERN_ERR "[sc8551-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
 	else if (sc->mode == SC8551_ROLE_SLAVE)					\
-		(KERN_ERR "[sc8551-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
+		printk(KERN_ERR "[sc8551-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
 	else										\
-		(KERN_ERR "[sc8551-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
+		printk(KERN_ERR "[sc8551-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
 } while(0);
 
 #define sc_info(fmt, ...)								\
 do {											\
 	if (sc->mode == SC8551_ROLE_MASTER)						\
-		(KERN_INFO "[sc8551-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
+		printk(KERN_INFO "[sc8551-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
 	else if (sc->mode == SC8551_ROLE_SLAVE)					\
-		(KERN_INFO "[sc8551-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
+		printk(KERN_INFO "[sc8551-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
 	else										\
-		(KERN_INFO "[sc8551-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
+		printk(KERN_INFO "[sc8551-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
 } while(0);
 
 #define sc_dbg(fmt, ...)								\
 do {											\
 	if (sc->mode == SC8551_ROLE_MASTER)						\
-		(KERN_DEBUG "[sc8551-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
+		printk(KERN_DEBUG "[sc8551-MASTER]:%s:" fmt, __func__, ##__VA_ARGS__);	\
 	else if (sc->mode == SC8551_ROLE_SLAVE)					\
-		(KERN_DEBUG "[sc8551-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
+		printk(KERN_DEBUG "[sc8551-SLAVE]:%s:" fmt, __func__, ##__VA_ARGS__);	\
 	else										\
-		(KERN_DEBUG "[sc8551-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
+		printk(KERN_DEBUG "[sc8551-STANDALONE]:%s:" fmt, __func__, ##__VA_ARGS__);\
 } while(0);
 
 
@@ -1288,7 +1288,7 @@ static int sc8551_detect_device(struct sc8551 *sc)
 			sc->chip_vendor = SC8551;
 	}
 
-	("sc8551_detect_device:PART_INFO:0x%x", data);
+	pr_err("sc8551_detect_device:PART_INFO:0x%x", data);
 	return ret;
 }
 
@@ -2116,7 +2116,7 @@ static int sc8551_charger_probe(struct i2c_client *client,
 	const struct of_device_id *match;
 	struct device_node *node = client->dev.of_node;
 	int ret;
-	("2012.09.04 wsy %s: start\n", __func__);
+	pr_err("2012.09.04 wsy %s: start\n", __func__);
 
 	sc = devm_kzalloc(&client->dev, sizeof(struct sc8551), GFP_KERNEL);
 	
@@ -2200,7 +2200,7 @@ static int sc8551_charger_probe(struct i2c_client *client,
 	sc_info("sc8551 probe successfully, Part Num:%d\n!", sc->part_no);
 
 
-	("2012.09.04 wsy %s: end\n", __func__);
+	pr_err("2012.09.04 wsy %s: end\n", __func__);
 
 	return 0;
 
@@ -2240,7 +2240,7 @@ static int sc8551_suspend_noirq(struct device *dev)
 	struct sc8551 *sc = i2c_get_clientdata(client);
 
 	if (sc->irq_waiting) {
-		("Aborting suspend, an interrupt was detected while suspending\n");
+		pr_err_ratelimited("Aborting suspend, an interrupt was detected while suspending\n");
 		return -EBUSY;
 	}
 	return 0;

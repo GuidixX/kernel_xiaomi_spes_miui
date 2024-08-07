@@ -7,28 +7,35 @@
 #include <linux/uaccess.h>
 #include <linux/kobject.h>
 #include <linux/of_gpio.h>
-#include <linux/pinctrl/consumer.h>
-#include <linux/leds.h>
 
 struct flashlight_data {
     int flash_en;
     int flash_now;
     struct kobject *kobj;
-    struct platform_device *pdev;
-    struct pinctrl *pinctrl;
-    struct pinctrl_state *gpio_state_active;
-    struct pinctrl_state *gpio_state_suspend;
-    struct led_classdev cdev;
 };
 
 static struct flashlight_data *flash_data;
 
-static void flashlight_brightness_set(struct led_classdev *cdev, enum led_brightness brightness)
+static ssize_t flash_on_show(struct kobject *kobj, struct kobj_attribute *attr, char *buf)
 {
-    int val = (brightness > 0) ? 1 : 0;
-    gpio_set_value(flash_data->flash_now, val);
-    pr_info("flashlight_brightness_set: Setting GPIO value to %d\n", val);
+    int val = gpio_get_value(flash_data->flash_en);
+    return sprintf(buf, "%d\n", val);
 }
+
+static ssize_t flash_on_store(struct kobject *kobj, struct kobj_attribute *attr, const char *buf, size_t count)
+{
+    int ret;
+    unsigned long val;
+
+    ret = kstrtoul(buf, 10, &val);
+    if (ret)
+        return ret;
+
+    gpio_set_value(flash_data->flash_en, val);
+    return count;
+}
+
+static struct kobj_attribute flash_on_attribute = __ATTR(flash_on, 0664, flash_on_show, flash_on_store);
 
 static int flashlight_probe(struct platform_device *pdev)
 {
@@ -36,57 +43,50 @@ static int flashlight_probe(struct platform_device *pdev)
     int ret;
 
     flash_data = devm_kzalloc(&pdev->dev, sizeof(*flash_data), GFP_KERNEL);
-    if (!flash_data) {
-        pr_err("Failed to allocate memory for flashlight_data\n");
+    if (!flash_data)
         return -ENOMEM;
-    }
-
-    flash_data->pdev = pdev;
 
     flash_data->flash_en = of_get_named_gpio(np, "qcom,flash-gpios", 0);
     if (!gpio_is_valid(flash_data->flash_en)) {
-        pr_err("Invalid GPIO for flash_en: %d\n", flash_data->flash_en);
+        dev_err(&pdev->dev, "Invalid GPIO for flash_en\n");
         return -EINVAL;
     }
 
     ret = devm_gpio_request_one(&pdev->dev, flash_data->flash_en, GPIOF_OUT_INIT_LOW, "flash_en");
     if (ret) {
-        pr_err("Failed to request flash_en GPIO: %d\n", ret);
+        dev_err(&pdev->dev, "Failed to request flash_en GPIO\n");
         return ret;
     }
 
     flash_data->flash_now = of_get_named_gpio(np, "qcom,flash-gpios", 1);
     if (!gpio_is_valid(flash_data->flash_now)) {
-        pr_err("Invalid GPIO for flash_now: %d\n", flash_data->flash_now);
+        dev_err(&pdev->dev, "Invalid GPIO for flash_now\n");
         return -EINVAL;
     }
 
     ret = devm_gpio_request_one(&pdev->dev, flash_data->flash_now, GPIOF_OUT_INIT_LOW, "flash_now");
     if (ret) {
-        pr_err("Failed to request flash_now GPIO: %d\n", ret);
+        dev_err(&pdev->dev, "Failed to request flash_now GPIO\n");
         return ret;
     }
 
-    flash_data->cdev.name = "led:torch";
-    flash_data->cdev.brightness = 0;
-    flash_data->cdev.max_brightness = 1;
-    flash_data->cdev.brightness_set = flashlight_brightness_set;
+    flash_data->kobj = kobject_create_and_add("flashlight", kernel_kobj);
+    if (!flash_data->kobj)
+        return -ENOMEM;
 
-    ret = led_classdev_register(&pdev->dev, &flash_data->cdev);
+    ret = sysfs_create_file(flash_data->kobj, &flash_on_attribute.attr);
     if (ret) {
-        pr_err("Failed to register LED class device: %d\n", ret);
+        kobject_put(flash_data->kobj);
         return ret;
     }
 
-    pr_info("Flashlight driver initialized with flash_en GPIO %d and flash_now GPIO %d\n",
-            flash_data->flash_en, flash_data->flash_now);
+    dev_info(&pdev->dev, "Flashlight driver initialized\n");
     return 0;
 }
 
 static int flashlight_remove(struct platform_device *pdev)
 {
-    pr_info("Removing flashlight driver\n");
-    led_classdev_unregister(&flash_data->cdev);
+    kobject_put(flash_data->kobj);
     return 0;
 }
 
@@ -109,4 +109,4 @@ module_platform_driver(flashlight_driver);
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("HALt");
-MODULE_DESCRIPTION("Flashlight driver with sysfs interface and LED class integration");
+MODULE_DESCRIPTION("Flashlight driver with sysfs interface");

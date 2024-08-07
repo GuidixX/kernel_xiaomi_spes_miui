@@ -54,7 +54,7 @@ static int nopmi_set_prop_input_suspend(struct nopmi_chg *nopmi_chg,
 	int rc;
 	rc = vote(nopmi_chg->fcc_votable, CHG_INPUT_SUSPEND_VOTER, (bool)val->intval, 0);
 	if (rc < 0) {
-		("%s : Couldn't vote to %s USB rc = %d\n",
+		pr_err("%s : Couldn't vote to %s USB rc = %d\n",
 			(bool)val->intval ? "suspend" : "resume", rc);
 		return rc;
 	}
@@ -82,11 +82,11 @@ static int nopmi_set_prop_system_temp_level(struct nopmi_chg *nopmi_chg,
 	if (nopmi_chg->system_temp_level == nopmi_chg->thermal_levels) { // thermal temp level
 		rc = vote(nopmi_chg->usb_icl_votable, THERMAL_DAEMON_VOTER, true, 0);
 		if(rc < 0){
-			("%s : icl vote failed\n", __func__);
+			pr_err("%s : icl vote failed\n", __func__);
 		}
 		rc = vote(nopmi_chg->fcc_votable, THERMAL_DAEMON_VOTER, true, 0);
 		if(rc < 0){
-			("%s : fcc vote failed \n", __func__);
+			pr_err("%s : fcc vote failed \n", __func__);
 		}
         	return rc;
 	}
@@ -110,14 +110,14 @@ static int nopmi_get_batt_health(struct nopmi_chg *nopmi_chg)
 	int ret;
 
 	if (nopmi_chg == NULL) {
-		("%s : nopmi_chg is null,can not use\n", __func__);
+		pr_err("%s : nopmi_chg is null,can not use\n", __func__);
 		return -EINVAL;
 	}
 
 	nopmi_chg->batt_health = POWER_SUPPLY_HEALTH_GOOD;
 	ret = power_supply_get_property(nopmi_chg->bms_psy, POWER_SUPPLY_PROP_TEMP, &pval);
 	if (ret < 0) {
-		("couldn't read batt temp property, ret=%d\n", ret);
+		pr_err("couldn't read batt temp property, ret=%d\n", ret);
 		return -EINVAL;
 	}
 
@@ -236,7 +236,7 @@ static int nopmi_batt_get_prop_internal(struct power_supply *psy,
 				nopmi_chg->batt_psy = power_supply_get_by_name("battery");
 			if (nopmi_chg->batt_psy)
 				power_supply_changed(nopmi_chg->batt_psy);
-			//("%s vbat_mv = %d\n", __func__, vbat_mv);
+			//pr_err("%s vbat_mv = %d\n", __func__, vbat_mv);
 		}
 		break;
 	case POWER_SUPPLY_PROP_VOLTAGE_NOW:
@@ -273,11 +273,11 @@ static int nopmi_batt_get_prop_internal(struct power_supply *psy,
 		pval->intval = nopmi_chg->input_suspend;
 		break;
 	default:
-		("batt power supply prop %d not supported\n", psp);
+		pr_debug("batt power supply prop %d not supported\n", psp);
 		return -EINVAL;
 	}
 	if (rc < 0) {
-		("Couldn't get prop %d rc = %d\n", psp, rc);
+		pr_debug("Couldn't get prop %d rc = %d\n", psp, rc);
 		return -ENODATA;
 	}
 
@@ -340,7 +340,7 @@ static int nopmi_batt_set_prop_internal(struct power_supply *psy,
 		rc = set_prop_battery_charging_enabled(nopmi_chg->jeita_ctl.usb_icl_votable, val);
 		break;
 	case POWER_SUPPLY_PROP_INPUT_SUSPEND:
-		("%s: Set input suspend prop, value:%d\n",__func__,val->intval);
+		pr_err("%s: Set input suspend prop, value:%d\n",__func__,val->intval);
 		rc = nopmi_set_prop_input_suspend(nopmi_chg, val);
 		break;
 	default:
@@ -425,7 +425,7 @@ static int nopmi_init_batt_psy(struct nopmi_chg *chg)
 	int rc = 0;
 
 	if(!chg) {
-		("chg is NULL\n");
+		pr_err("chg is NULL\n");
 		return rc;
 	}
 
@@ -436,7 +436,7 @@ static int nopmi_init_batt_psy(struct nopmi_chg *chg)
 					   &batt_cfg);
 
 	if (IS_ERR(chg->batt_psy)) {
-		("Couldn't register battery power supply\n");
+		pr_err("Couldn't register battery power supply\n");
 		return PTR_ERR(chg->batt_psy);
 	}
 
@@ -463,7 +463,7 @@ static int get_real_type(void)
 	if (g_nopmi_chg->pd_active == 1 && real_type != POWER_SUPPLY_TYPE_UNKNOWN)
 		real_type = POWER_SUPPLY_TYPE_USB_PD;
 
-	("get_real_type %d\n", real_type);
+	pr_err("get_real_type %d\n", real_type);
 	return real_type;
 }
 #endif
@@ -542,7 +542,7 @@ static int nopmi_usb_get_prop_internal(struct power_supply *psy,
 		break;
 	case POWER_SUPPLY_PROP_REAL_TYPE:
                 if(!g_nopmi_chg){
-		("g_nopmi_chg is null\n");
+		pr_err("g_nopmi_chg is null\n");
                 break;
 		}
 		if (g_nopmi_chg->pd_active) {
@@ -550,7 +550,7 @@ static int nopmi_usb_get_prop_internal(struct power_supply *psy,
 		} else {
 			val->intval = g_nopmi_chg->real_type;
 		}
-		("real_type=%d\n",val->intval);
+		pr_err("real_type=%d\n",val->intval);
 		break;
 	case POWER_SUPPLY_PROP_PD_ACTIVE:
 		val->intval = g_nopmi_chg->pd_active;
@@ -582,7 +582,7 @@ static int nopmi_usb_get_prop_internal(struct power_supply *psy,
 	}
 
 	if (rc < 0) {
-		("Couldn't get prop %d rc = %d\n", psp, rc);
+		pr_debug("Couldn't get prop %d rc = %d\n", psp, rc);
 		return -ENODATA;
 	}
 
@@ -629,7 +629,7 @@ static int nopmi_usb_get_prop(struct power_supply *psy,
 				rc = power_supply_get_property(nopmi_chg->bms_psy, POWER_SUPPLY_PROP_VOLTAGE_NOW, &value);
 				if (rc < 0) {
 					value.intval = 3800000;
-					("%s : get POWER_SUPPLY_PROP_CURRENT_AVG fail\n", __func__);
+					pr_err("%s : get POWER_SUPPLY_PROP_CURRENT_AVG fail\n", __func__);
 				}
 			}
 			if (value.intval < 3300000)
@@ -747,7 +747,7 @@ static int nopmi_usb_set_prop(struct power_supply *psy,
 		ret = nopmi_usb_set_prop_internal(psy, psp, val);
 	}
 
-	("2021.09.21 wsy %s psp=%d,val->intval=%d",__func__,psp,val->intval);
+	pr_err("2021.09.21 wsy %s psp=%d,val->intval=%d",__func__,psp,val->intval);
 #if 1
 	switch (psp) {
 		case POWER_SUPPLY_PROP_ONLINE:
@@ -767,7 +767,7 @@ static int nopmi_usb_set_prop(struct power_supply *psy,
 			ret = 0;
 			break;
 		case POWER_SUPPLY_PROP_MTBF_CUR:
-			("%s psp=%d Set MTBF current val->intval=%d",__func__, psp, val->intval);
+			pr_err("%s psp=%d Set MTBF current val->intval=%d",__func__, psp, val->intval);
 			g_nopmi_chg->mtbf_cur = val->intval;
 			ret =0;
 			break;
@@ -839,7 +839,7 @@ static int nopmi_init_usb_psy(struct nopmi_chg *chg)
 						  &usb_psy_desc,
 						  &usb_cfg);
 	if (IS_ERR(chg->usb_psy)) {
-		("Couldn't register USB power supply\n");
+		pr_err("Couldn't register USB power supply\n");
 		return PTR_ERR(chg->usb_psy);
 	}
 
@@ -858,56 +858,56 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "jeita_temp_above_t4_cv", &val) >= 0)
 		chg->jeita_ctl.dt.jeita_temp_above_t4_cv = val;
 	else {
-		("use default JEITA_TEMP_ABOVE_T4_CV:%d\n",
+		pr_err("use default JEITA_TEMP_ABOVE_T4_CV:%d\n",
 		   JEITA_TEMP_ABOVE_T4_CV);
 		chg->jeita_ctl.dt.jeita_temp_above_t4_cv = JEITA_TEMP_ABOVE_T4_CV;
 	}
 	if (of_property_read_u32(np, "jeita_temp_t3_to_t4_cv", &val) >= 0)
 		chg->jeita_ctl.dt.jeita_temp_t3_to_t4_cv	 = val;
 	else {
-		("use default JEITA_TEMP_T3_TO_T4_CV:%d\n",
+		pr_err("use default JEITA_TEMP_T3_TO_T4_CV:%d\n",
 		   JEITA_TEMP_T3_TO_T4_CV);
 		chg->jeita_ctl.dt.jeita_temp_t3_to_t4_cv = JEITA_TEMP_T3_TO_T4_CV;
 	}
 	if (of_property_read_u32(np, "jeita_temp_t2_to_t3_cv", &val) >= 0)
 		chg->jeita_ctl.dt.jeita_temp_t2_to_t3_cv = val;
 	else {
-		("use default JEITA_TEMP_T2_TO_T3_CV:%d\n",
+		pr_err("use default JEITA_TEMP_T2_TO_T3_CV:%d\n",
 		   JEITA_TEMP_T2_TO_T3_CV);
 		chg->jeita_ctl.dt.jeita_temp_t2_to_t3_cv = JEITA_TEMP_T2_TO_T3_CV;
 	}
 	if (of_property_read_u32(np, "jeita_temp_t1p5_to_t2_cv", &val) >= 0)
 		chg->jeita_ctl.dt.jeita_temp_t1p5_to_t2_cv = val;
 	else {
-		("use default JEITA_TEMP_T1P5_TO_T2_CV:%d\n",
+		pr_err("use default JEITA_TEMP_T1P5_TO_T2_CV:%d\n",
 		   JEITA_TEMP_T1P5_TO_T2_CV);
 		chg->jeita_ctl.dt.jeita_temp_t1p5_to_t2_cv = JEITA_TEMP_T1P5_TO_T2_CV;
 	}
 	if (of_property_read_u32(np, "jeita_temp_t1_to_t1p5_cv", &val) >= 0)
 		chg->jeita_ctl.dt.jeita_temp_t1_to_t1p5_cv = val;
 	else {
-		("use default JEITA_TEMP_T1_TO_T1P5_CV:%d\n",
+		pr_err("use default JEITA_TEMP_T1_TO_T1P5_CV:%d\n",
 		   JEITA_TEMP_T1_TO_T1P5_CV);
 		chg->jeita_ctl.dt.jeita_temp_t1_to_t1p5_cv = JEITA_TEMP_T1_TO_T1P5_CV;
 	}
 	if (of_property_read_u32(np, "jeita_temp_t0_to_t1_cv", &val) >= 0)
 		chg->jeita_ctl.dt.jeita_temp_t0_to_t1_cv = val;
 	else {
-		("use default JEITA_TEMP_T0_TO_T1_CV:%d\n",
+		pr_err("use default JEITA_TEMP_T0_TO_T1_CV:%d\n",
 		   JEITA_TEMP_T0_TO_T1_CV);
 		chg->jeita_ctl.dt.jeita_temp_t0_to_t1_cv = JEITA_TEMP_T0_TO_T1_CV;
 	}
 	if (of_property_read_u32(np, "jeita_temp_tn1_to_t0_cv", &val) >= 0)
 		chg->jeita_ctl.dt.jeita_temp_tn1_to_t0_cv = val;
 	else {
-		("use default JEITA_TEMP_TN1_TO_T0_CV:%d\n",
+		pr_err("use default JEITA_TEMP_TN1_TO_T0_CV:%d\n",
 		   JEITA_TEMP_TN1_TO_T0_CV);
 		chg->jeita_ctl.dt.jeita_temp_tn1_to_t0_cv = JEITA_TEMP_TN1_TO_T0_CV;
 	}
 	if (of_property_read_u32(np, "jeita_temp_below_t0_cv", &val) >= 0)
 		chg->jeita_ctl.dt.jeita_temp_below_t0_cv = val;
 	else {
-		("use default JEITA_TEMP_BELOW_T0_CV:%d\n",
+		pr_err("use default JEITA_TEMP_BELOW_T0_CV:%d\n",
 		   JEITA_TEMP_BELOW_T0_CV);
 		chg->jeita_ctl.dt.jeita_temp_below_t0_cv = JEITA_TEMP_BELOW_T0_CV;
 	}
@@ -915,7 +915,7 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "normal-charge-voltage", &val) >= 0)
 		chg->jeita_ctl.dt.normal_charge_voltage = val;
 	else {
-		("use default JEITA_TEMP_NORMAL_VOLTAGE:%d\n",
+		pr_err("use default JEITA_TEMP_NORMAL_VOLTAGE:%d\n",
 		   JEITA_TEMP_NORMAL_VOLTAGE);
 		chg->jeita_ctl.dt.normal_charge_voltage = JEITA_TEMP_NORMAL_VOLTAGE;
 	}
@@ -929,14 +929,14 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "temp_t4_thres", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t4_thres = val;
 	else {
-		("use default TEMP_T4_THRES:%d\n",
+		pr_err("use default TEMP_T4_THRES:%d\n",
 		   TEMP_T4_THRES);
 		chg->jeita_ctl.dt.temp_t4_thres = TEMP_T4_THRES;
 	}
 	if (of_property_read_u32(np, "temp_t4_thres_minus_x_degree", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t4_thres_minus_x_degree = val;
 	else {
-		("use default TEMP_T4_THRES_MINUS_X_DEGREE:%d\n",
+		pr_err("use default TEMP_T4_THRES_MINUS_X_DEGREE:%d\n",
 		   TEMP_T4_THRES_MINUS_X_DEGREE);
 		chg->jeita_ctl.dt.temp_t4_thres_minus_x_degree =
 				   TEMP_T4_THRES_MINUS_X_DEGREE;
@@ -944,14 +944,14 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "temp_t3_thres", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t3_thres = val;
 	else {
-		("use default TEMP_T3_THRES:%d\n",
+		pr_err("use default TEMP_T3_THRES:%d\n",
 		   TEMP_T3_THRES);
 		chg->jeita_ctl.dt.temp_t3_thres = TEMP_T3_THRES;
 	}
 	if (of_property_read_u32(np, "temp_t3_thres_minus_x_degree", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t3_thres_minus_x_degree = val;
 	else {
-		("use default TEMP_T3_THRES_MINUS_X_DEGREE:%d\n",
+		pr_err("use default TEMP_T3_THRES_MINUS_X_DEGREE:%d\n",
 		   TEMP_T3_THRES_MINUS_X_DEGREE);
 		chg->jeita_ctl.dt.temp_t3_thres_minus_x_degree =
 				   TEMP_T3_THRES_MINUS_X_DEGREE;
@@ -959,14 +959,14 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "temp_t2_thres", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t2_thres = val;
 	else {
-		("use default TEMP_T2_THRES:%d\n",
+		pr_err("use default TEMP_T2_THRES:%d\n",
 		   TEMP_T2_THRES);
 		chg->jeita_ctl.dt.temp_t2_thres = TEMP_T2_THRES;
 	}
 	if (of_property_read_u32(np, "temp_t2_thres_plus_x_degree", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t2_thres_plus_x_degree = val;
 	else {
-		("use default TEMP_T2_THRES_PLUS_X_DEGREE:%d\n",
+		pr_err("use default TEMP_T2_THRES_PLUS_X_DEGREE:%d\n",
 		   TEMP_T2_THRES_PLUS_X_DEGREE);
 		chg->jeita_ctl.dt.temp_t2_thres_plus_x_degree =
 				   TEMP_T2_THRES_PLUS_X_DEGREE;
@@ -974,14 +974,14 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "temp_t1p5_thres", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t1p5_thres = val;
 	else {
-		("use default TEMP_T1P5_THRES:%d\n",
+		pr_err("use default TEMP_T1P5_THRES:%d\n",
 		   TEMP_T1P5_THRES);
 		chg->jeita_ctl.dt.temp_t1p5_thres = TEMP_T1P5_THRES;
 	}
 	if (of_property_read_u32(np, "temp_t1p5_thres_plus_x_degree", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t1p5_thres_plus_x_degree = val;
 	else {
-		("use default TEMP_T1P5_THRES_PLUS_X_DEGREE:%d\n",
+		pr_err("use default TEMP_T1P5_THRES_PLUS_X_DEGREE:%d\n",
 		   TEMP_T1P5_THRES_PLUS_X_DEGREE);
 		chg->jeita_ctl.dt.temp_t1p5_thres_plus_x_degree =
 				   TEMP_T1P5_THRES_PLUS_X_DEGREE;
@@ -989,14 +989,14 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "temp_t1_thres", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t1_thres = val;
 	else {
-		("use default TEMP_T1_THRES:%d\n",
+		pr_err("use default TEMP_T1_THRES:%d\n",
 		   TEMP_T1_THRES);
 		chg->jeita_ctl.dt.temp_t1_thres = TEMP_T1_THRES;
 	}
 	if (of_property_read_u32(np, "temp_t1_thres_plus_x_degree", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t1_thres_plus_x_degree = val;
 	else {
-		("use default TEMP_T1_THRES_PLUS_X_DEGREE:%d\n",
+		pr_err("use default TEMP_T1_THRES_PLUS_X_DEGREE:%d\n",
 		   TEMP_T1_THRES_PLUS_X_DEGREE);
 		chg->jeita_ctl.dt.temp_t1_thres_plus_x_degree =
 				   TEMP_T1_THRES_PLUS_X_DEGREE;
@@ -1004,14 +1004,14 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "temp_t0_thres", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t0_thres = val;
 	else {
-		("use default TEMP_T0_THRES:%d\n",
+		pr_err("use default TEMP_T0_THRES:%d\n",
 		   TEMP_T0_THRES);
 		chg->jeita_ctl.dt.temp_t0_thres = TEMP_T0_THRES;
 	}
 	if (of_property_read_u32(np, "temp_t0_thres_plus_x_degree", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t0_thres_plus_x_degree = val;
 	else {
-		("use default TEMP_T0_THRES_PLUS_X_DEGREE:%d\n",
+		pr_err("use default TEMP_T0_THRES_PLUS_X_DEGREE:%d\n",
 		   TEMP_T0_THRES_PLUS_X_DEGREE);
 		chg->jeita_ctl.dt.temp_t0_thres_plus_x_degree =
 				   TEMP_T0_THRES_PLUS_X_DEGREE;
@@ -1019,14 +1019,14 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "temp_tn1_thres", &val) >= 0)
 		chg->jeita_ctl.dt.temp_tn1_thres = val;
 	else {
-		("use default TEMP_TN1_THRES:%d\n",
+		pr_err("use default TEMP_TN1_THRES:%d\n",
 		   TEMP_TN1_THRES);
 		chg->jeita_ctl.dt.temp_tn1_thres = TEMP_TN1_THRES;
 	}
 	if (of_property_read_u32(np, "temp_tn1_thres_plus_x_degree", &val) >= 0)
 		chg->jeita_ctl.dt.temp_tn1_thres_plus_x_degree = val;
 	else {
-		("use default TEMP_TN1_THRES_PLUS_X_DEGREE:%d\n",
+		pr_err("use default TEMP_TN1_THRES_PLUS_X_DEGREE:%d\n",
 		   TEMP_TN1_THRES_PLUS_X_DEGREE);
 		chg->jeita_ctl.dt.temp_tn1_thres_plus_x_degree =
 				   TEMP_TN1_THRES_PLUS_X_DEGREE;
@@ -1034,49 +1034,49 @@ static int nopmi_parse_dt_jeita(struct nopmi_chg *chg, struct device_node *np)
 	if (of_property_read_u32(np, "temp_neg_10_thres", &val) >= 0)
 		chg->jeita_ctl.dt.temp_neg_10_thres = val;
 	else {
-		("use default TEMP_NEG_10_THRES:%d\n",
+		pr_err("use default TEMP_NEG_10_THRES:%d\n",
 		   TEMP_NEG_10_THRES);
 		chg->jeita_ctl.dt.temp_neg_10_thres = TEMP_NEG_10_THRES;
 	}
 	if (of_property_read_u32(np, "temp_t3_to_t4_fcc", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t3_to_t4_fcc = val;
 	else {
-		("use default TEMP_T3_TO_T4_FCC:%d\n",
+		pr_err("use default TEMP_T3_TO_T4_FCC:%d\n",
 		   TEMP_T3_TO_T4_FCC);
 		chg->jeita_ctl.dt.temp_t3_to_t4_fcc = TEMP_T3_TO_T4_FCC;
 	}
 	if (of_property_read_u32(np, "temp_t2_to_t3_fcc", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t2_to_t3_fcc = val;
 	else {
-		("use default TEMP_T2_TO_T3_FCC:%d\n",
+		pr_err("use default TEMP_T2_TO_T3_FCC:%d\n",
 		   TEMP_T2_TO_T3_FCC);
 		chg->jeita_ctl.dt.temp_t2_to_t3_fcc = TEMP_T2_TO_T3_FCC;
 	}
 	if (of_property_read_u32(np, "temp_t1p5_to_t2_fcc", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t1p5_to_t2_fcc = val;
 	else {
-		("use default TEMP_T1P5_TO_T2_FCC:%d\n",
+		pr_err("use default TEMP_T1P5_TO_T2_FCC:%d\n",
 		   TEMP_T1P5_TO_T2_FCC);
 		chg->jeita_ctl.dt.temp_t1p5_to_t2_fcc = TEMP_T1P5_TO_T2_FCC;
 	}
 	if (of_property_read_u32(np, "temp_t1_to_t1p5_fcc", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t1_to_t1p5_fcc = val;
 	else {
-		("use default TEMP_T1_TO_T1P5_FCC:%d\n",
+		pr_err("use default TEMP_T1_TO_T1P5_FCC:%d\n",
 		   TEMP_T1_TO_T1P5_FCC);
 		chg->jeita_ctl.dt.temp_t1_to_t1p5_fcc = TEMP_T1_TO_T1P5_FCC;
 	}
 	if (of_property_read_u32(np, "temp_t0_to_t1_fcc", &val) >= 0)
 		chg->jeita_ctl.dt.temp_t0_to_t1_fcc = val;
 	else {
-		("use default TEMP_T0_TO_T1_FCC:%d\n",
+		pr_err("use default TEMP_T0_TO_T1_FCC:%d\n",
 		   TEMP_T0_TO_T1_FCC);
 		chg->jeita_ctl.dt.temp_t0_to_t1_fcc = TEMP_T0_TO_T1_FCC;
 	}
 	if (of_property_read_u32(np, "temp_tn1_to_t0_fcc", &val) >= 0)
 		chg->jeita_ctl.dt.temp_tn1_to_t0_fcc = val;
 	else {
-		("use default TEMP_TN1_TO_T0_FCC:%d\n",
+		pr_err("use default TEMP_TN1_TO_T0_FCC:%d\n",
 		   TEMP_TN1_TO_T0_FCC);
 		chg->jeita_ctl.dt.temp_tn1_to_t0_fcc = TEMP_TN1_TO_T0_FCC;
 	}
@@ -1102,7 +1102,7 @@ static int nopmi_parse_dt_thermal(struct nopmi_chg *chg, struct device_node *np)
 				chg->thermal_mitigation,
 				chg->thermal_levels);
 		if (rc < 0) {
-			("Couldn't read threm limits rc = %d\n", rc);
+			pr_err("Couldn't read threm limits rc = %d\n", rc);
 			return rc;
 		}
 	}
@@ -1116,7 +1116,7 @@ static int nopmi_parse_dt(struct nopmi_chg *chg)
 	int rc = 0;
 
 	if (!np) {
-		("device tree node missing\n");
+		pr_err("device tree node missing\n");
 		return -EINVAL;
 	}
 
@@ -1125,7 +1125,7 @@ static int nopmi_parse_dt(struct nopmi_chg *chg)
 	if (rc < 0)
 		chg->dt.batt_profile_fv_uv = -EINVAL;
 	else
-		("nopmi_parse_dt %d\n",chg->dt.batt_profile_fv_uv);
+		pr_err("nopmi_parse_dt %d\n",chg->dt.batt_profile_fv_uv);
 
 	rc = nopmi_parse_dt_jeita(chg, np);
 	if (rc < 0)
@@ -1143,7 +1143,7 @@ static void nopmi_chg_workfunc(struct work_struct *work)
 	struct nopmi_chg *chg = container_of(work,
 		struct nopmi_chg, nopmi_chg_work.work);
 
-	("2021.09.22 wsy %s g_nopmi_chg:0x%x\n",__func__, g_nopmi_chg);
+	pr_err("2021.09.22 wsy %s g_nopmi_chg:0x%x\n",__func__, g_nopmi_chg);
 
 	if(nopmi_chg_is_usb_present(chg->usb_psy))
 	{
@@ -1154,7 +1154,7 @@ static void nopmi_chg_workfunc(struct work_struct *work)
 
 static void start_nopmi_chg_workfunc(void)
 {
-	("2021.09.21 wsy %s g_nopmi_chg:0x%x\n",__func__, g_nopmi_chg);
+	pr_err("2021.09.21 wsy %s g_nopmi_chg:0x%x\n",__func__, g_nopmi_chg);
 	if(g_nopmi_chg)
 	{
 		schedule_delayed_work(&g_nopmi_chg->nopmi_chg_work, 0);
@@ -1165,7 +1165,7 @@ static void start_nopmi_chg_workfunc(void)
 
 static void stop_nopmi_chg_workfunc(void)
 {
-	("2021.09.21 wsy %s g_nopmi_chg:0x%x\n",__func__, g_nopmi_chg);
+	pr_err("2021.09.21 wsy %s g_nopmi_chg:0x%x\n",__func__, g_nopmi_chg);
 
 	if(g_nopmi_chg)
 	{
@@ -1194,7 +1194,7 @@ static void  nopmi_cv_step_monitor_work(struct work_struct *work)
 		pval.intval = 0;
 		rc = power_supply_get_property(nopmi_chg->bms_psy, POWER_SUPPLY_PROP_CURRENT_NOW, &pval);
 		if (rc < 0) {
-			("%s : get POWER_SUPPLY_PROP_CURRENT_NOW fail\n", __func__);
+			pr_err("%s : get POWER_SUPPLY_PROP_CURRENT_NOW fail\n", __func__);
 			goto out;
 		}
 		batt_curr =  pval.intval / 1000;
@@ -1202,7 +1202,7 @@ static void  nopmi_cv_step_monitor_work(struct work_struct *work)
 		pval.intval = 0;
 		rc = power_supply_get_property(nopmi_chg->bms_psy, POWER_SUPPLY_PROP_VOLTAGE_NOW, &pval);
 		if (rc < 0) {
-			("%s : get POWER_SUPPLY_PROP_CURRENT_NOW fail\n", __func__);
+			pr_err("%s : get POWER_SUPPLY_PROP_CURRENT_NOW fail\n", __func__);
 			goto out;
 		}
 		batt_volt = pval.intval / 1000;
@@ -1211,7 +1211,7 @@ static void  nopmi_cv_step_monitor_work(struct work_struct *work)
 	{
 		goto out;
 	}
-	("fg_cc_cv_step_check: batt_volt:%d batt_curr:%d", batt_volt, batt_curr);
+	pr_err("fg_cc_cv_step_check: batt_volt:%d batt_curr:%d", batt_volt, batt_curr);
 	/*discharging*/
   	if(!nopmi_chg->fcc_votable)
         {
@@ -1232,7 +1232,7 @@ static void  nopmi_cv_step_monitor_work(struct work_struct *work)
 			if(count >= 2){
 				stepdown = true;
 				count = 0;
-				("fg_cc_cv_step_check:stepdown");
+				pr_err("fg_cc_cv_step_check:stepdown");
 			}
 			break;
 		}
@@ -1246,12 +1246,12 @@ static void  nopmi_cv_step_monitor_work(struct work_struct *work)
 	else
 		votFCC = finalFCC - STEP_DOWN_CURR_MA;
 	vote(nopmi_chg->fcc_votable, CC_CV_STEP_VOTER, true, votFCC);
-	("fg_cc_cv_step_check: i:%d cccv_step vote:%d stepdown:%d finalFCC:%d",
+	pr_err("fg_cc_cv_step_check: i:%d cccv_step vote:%d stepdown:%d finalFCC:%d",
 					i, votFCC, stepdown, finalFCC);
 out:
 	schedule_delayed_work(&nopmi_chg->cvstep_monitor_work,
 				msecs_to_jiffies(NOPMI_CHG_CV_STEP_MONITOR_WORKFUNC_GAP));
-	("nopmi_cv_step_monitor_work: end");
+	pr_err("nopmi_cv_step_monitor_work: end");
 }
 
 static int nopmi_chg_probe(struct platform_device *pdev)
@@ -1262,13 +1262,13 @@ static int nopmi_chg_probe(struct platform_device *pdev)
 	struct power_supply *psy;
 	if (probe_cnt > PROBE_CNT_MAX)
 	{
-		("wsy nopmi_chg probe stop probe_cnt:%d,PROBE_CNT_MAX=%d\n", probe_cnt,PROBE_CNT_MAX);
+		pr_err("wsy nopmi_chg probe stop probe_cnt:%d,PROBE_CNT_MAX=%d\n", probe_cnt,PROBE_CNT_MAX);
 		return 0;
 	}
 
  	psy = power_supply_get_by_name("bms");
 	if (!psy) {
-		("%s get bms psy fail\n", __func__);
+		pr_err("%s get bms psy fail\n", __func__);
 		if (probe_cnt <= PROBE_CNT_MAX)
 		{
 			return -EPROBE_DEFER;
@@ -1282,7 +1282,7 @@ static int nopmi_chg_probe(struct platform_device *pdev)
 
 	psy = power_supply_get_by_name("bbc");
 	if (!psy) {
-		("%s get main psy fail\n", __func__);
+		pr_err("%s get main psy fail\n", __func__);
 		if (probe_cnt <= PROBE_CNT_MAX)
 		{
 			return -EPROBE_DEFER;
@@ -1303,12 +1303,12 @@ static int nopmi_chg_probe(struct platform_device *pdev)
 			sizeof(struct nopmi_chg),
 			GFP_KERNEL);
 		if (!nopmi_chg) {
-			("Failed to allocate memory\n");
+			pr_err("Failed to allocate memory\n");
 			return -ENOMEM;
 		}
 	}
 	if (!nopmi_chg) {
-		("No platform data found\n");
+		pr_err("No platform data found\n");
 		return -EINVAL;
 	}
 
@@ -1320,19 +1320,19 @@ static int nopmi_chg_probe(struct platform_device *pdev)
 
 	rc = nopmi_parse_dt(nopmi_chg);
 	if (rc < 0) {
-		("Couldn't parse device tree rc=%d\n", rc);
+		pr_err("Couldn't parse device tree rc=%d\n", rc);
 		goto err_free;
 	}
 
 	rc = nopmi_init_batt_psy(nopmi_chg);
 	if (rc < 0) {
-		("Couldn't initialize batt psy rc=%d\n", rc);
+		pr_err("Couldn't initialize batt psy rc=%d\n", rc);
 		goto cleanup;
 	}
 
 	rc = nopmi_init_usb_psy(nopmi_chg);
 	if (rc < 0) {
-		("Couldn't initialize usb psy rc=%d\n", rc);
+		pr_err("Couldn't initialize usb psy rc=%d\n", rc);
 		goto cleanup;
 	}
 
@@ -1355,11 +1355,11 @@ static int nopmi_chg_probe(struct platform_device *pdev)
 	if((NOPMI_CHARGER_IC_SYV == nopmi_get_charger_ic_type()) || (NOPMI_CHARGER_IC_MAXIM == nopmi_get_charger_ic_type())||(NOPMI_CHARGER_IC_SC == nopmi_get_charger_ic_type()))
 		device_init_wakeup(g_nopmi_chg->dev, true);
 
-	("wsy nopmi_chg probe end\n");
+	pr_err("wsy nopmi_chg probe end\n");
 	return 0;
 
 cleanup:
-	("nopmi_chg probe fail\n");
+	pr_err("nopmi_chg probe fail\n");
 err_free:
 	devm_kfree(&pdev->dev,nopmi_chg);
 	return rc;
@@ -1394,13 +1394,13 @@ static struct platform_driver nopmi_chg_driver = {
 static int __init nopmi_chg_init(void)
 {
     platform_driver_register(&nopmi_chg_driver);
-	("nopmi_chg init end\n");
+	pr_err("nopmi_chg init end\n");
     return 0;
 }
 
 static void __exit nopmi_chg_exit(void)
 {
-	("nopmi_chg exit\n");
+	pr_err("nopmi_chg exit\n");
 	platform_driver_unregister(&nopmi_chg_driver);
 }
 

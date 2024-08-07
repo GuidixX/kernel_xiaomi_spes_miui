@@ -17,7 +17,7 @@ int nopmi_chg_is_usb_present(struct power_supply *usb_psy)
 	{
 		usb_psy = power_supply_get_by_name("usb");
 		if (!usb_psy) {
-			("usb supply not found, defer probe\n");
+			pr_err("usb supply not found, defer probe\n");
 			return -EINVAL;
 		}
 	}
@@ -25,7 +25,7 @@ int nopmi_chg_is_usb_present(struct power_supply *usb_psy)
 	ret = power_supply_get_property(usb_psy,
 				POWER_SUPPLY_PROP_ONLINE, &prop);
 	if (ret < 0) {
-		("couldn't read usb_present property, ret=%d\n", ret);
+		pr_err("couldn't read usb_present property, ret=%d\n", ret);
 		return -EINVAL;
 	}
 	usb_present = prop.intval;
@@ -46,7 +46,7 @@ char nopmi_set_charger_ic_type(NOPMI_CHARGER_IC_TYPE nopmi_type)
 	{
 		ret = -ENODEV;
 	}
-	("2012.09.04 wsy %s: start nopmi_type=%d nopmi_charger_ic=%d\n", __func__, nopmi_type, nopmi_charger_ic);
+	pr_err("2012.09.04 wsy %s: start nopmi_type=%d nopmi_charger_ic=%d\n", __func__, nopmi_type, nopmi_charger_ic);
 	return ret;
 }
 
@@ -105,7 +105,7 @@ int nopmi_get_quick_charge_type(struct power_supply *usb_psy)
 	{
 		usb_psy = power_supply_get_by_name("usb");
 		if (!usb_psy) {
-			("usb supply not found, defer probe\n");
+			pr_err("usb supply not found, defer probe\n");
 			return -EINVAL;
 		}
 	}
@@ -113,7 +113,7 @@ int nopmi_get_quick_charge_type(struct power_supply *usb_psy)
 	ret = power_supply_get_property(usb_psy,
 				POWER_SUPPLY_PROP_REAL_TYPE, &prop);
 	if (ret < 0) {
-		("couldn't read usb real type, ret=%d\n", ret);
+		pr_err("couldn't read usb real type, ret=%d\n", ret);
 		return -EINVAL;
 	}
 	chg_type = prop.intval;
@@ -122,28 +122,28 @@ int nopmi_get_quick_charge_type(struct power_supply *usb_psy)
 	{
 		batt_psy = power_supply_get_by_name("battery");
 		if(!batt_psy){
-			("battery supply not found, defer probe\n");
+			pr_err("battery supply not found, defer probe\n");
 			return -EINVAL;
 		}
 	}
 
 	ret = power_supply_get_property(batt_psy, POWER_SUPPLY_PROP_TEMP, &prop);
 	if (ret < 0) {
-		("couldn't read batt temp property, ret=%d\n", ret);
+		pr_err("couldn't read batt temp property, ret=%d\n", ret);
 		return -EINVAL;
 	}
 
-	("battery temp: %d", prop.intval);
+	pr_info("battery temp: %d", prop.intval);
 	if (prop.intval < 50 || prop.intval >= 480) {
 		if (usb_psy && !is_single_flash){
-			("battery temp is under 5 or above 48");
+			pr_info("battery temp is under 5 or above 48");
 			power_supply_changed(usb_psy);
 		}
 		is_single_flash = true;
 		return 0;
 	} else {
 		if (usb_psy && is_single_flash){
-			("battery temp returned to normal");
+			pr_info("battery temp returned to normal");
 			power_supply_changed(usb_psy);
 		}
 		is_single_flash = false;

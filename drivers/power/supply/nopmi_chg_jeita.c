@@ -13,12 +13,12 @@ static int nopmi_chg_jeita_get_bat_temperature(struct nopmi_chg_jeita_st *nopmi_
 	int ret = 0;
 	int temp;
 	
-	("2021.09.10 wsy start %s:\n", __func__);
+	pr_err("2021.09.10 wsy start %s:\n", __func__);
     if(!nopmi_chg_jeita->bms_psy)
     {
     	nopmi_chg_jeita->bms_psy = power_supply_get_by_name("bms");
         if (!nopmi_chg_jeita->bms_psy) {
-        	("bms supply not found, defer probe\n");
+        	pr_err("bms supply not found, defer probe\n");
         	return -EINVAL;
         }
 	}
@@ -26,12 +26,12 @@ static int nopmi_chg_jeita_get_bat_temperature(struct nopmi_chg_jeita_st *nopmi_
 	ret = power_supply_get_property(nopmi_chg_jeita->bms_psy,
 				POWER_SUPPLY_PROP_TEMP, &prop);
 	if (ret < 0) {
-		("couldn't read temperature property, ret=%d\n", ret);
+		pr_err("couldn't read temperature property, ret=%d\n", ret);
 		return -EINVAL;
 	}
 	temp = prop.intval/10;
 	
-	("2021.09.10 wsy end %s:get_bat_temperature is %d\n", __func__, temp);
+	pr_err("2021.09.10 wsy end %s:get_bat_temperature is %d\n", __func__, temp);
 	return temp;
 }
 
@@ -41,12 +41,12 @@ static int nopmi_chg_jeita_get_charger_voltage(struct nopmi_chg_jeita_st *nopmi_
 	int ret = 0;
 	int voltage;
 	
-	("2021.09.10 wsy start %s: \n", __func__);
+	pr_err("2021.09.10 wsy start %s: \n", __func__);
     if(!nopmi_chg_jeita->bbc_psy)
     {
      	nopmi_chg_jeita->bbc_psy = power_supply_get_by_name("bbc");
         if (!nopmi_chg_jeita->bbc_psy) {
-        	("bbc supply not found, defer probe\n");
+        	pr_err("bbc supply not found, defer probe\n");
         	return -EINVAL;
         }
 	}
@@ -54,11 +54,11 @@ static int nopmi_chg_jeita_get_charger_voltage(struct nopmi_chg_jeita_st *nopmi_
 	ret = power_supply_get_property(nopmi_chg_jeita->bbc_psy,
 				POWER_SUPPLY_PROP_VOLTAGE_NOW, &prop);
 	if (ret < 0) {
-		("couldn't read voltage property, ret=%d\n", ret);
+		pr_err("couldn't read voltage property, ret=%d\n", ret);
 		return -EINVAL;
 	}
 	voltage = prop.intval;
-	("2021.09.10 wsy end %s:voltage is %d\n", __func__, voltage);
+	pr_err("2021.09.10 wsy end %s:voltage is %d\n", __func__, voltage);
 	return voltage;
 }
 
@@ -70,18 +70,18 @@ static int nopmi_chg_jeita_get_batt_id(struct nopmi_chg_jeita_st *nopmi_chg_jeit
 
 	nopmi_chg_jeita->bms_psy = power_supply_get_by_name("bms");
 	if (!nopmi_chg_jeita->bms_psy) {
-		("usb supply not found, defer probe\n");
+		pr_err("usb supply not found, defer probe\n");
 		return -EINVAL;
 	}
 
 	ret = power_supply_get_property(nopmi_chg_jeita->bms_psy,
 				POWER_SUPPLY_PROP_RESISTANCE_ID, &prop);
 	if (ret < 0) {
-		("couldn't get batt_id property, ret=%d\n", ret);
+		pr_err("couldn't get batt_id property, ret=%d\n", ret);
 		return -EINVAL;
 	}
 	batt_id = prop.intval;
-	("%s:get batt_id: %d\n", __func__, prop.intval);
+	pr_err("%s:get batt_id: %d\n", __func__, prop.intval);
 	return batt_id;
 }
 
@@ -93,18 +93,18 @@ static int nopmi_chg_jeita_get_pd_active(struct nopmi_chg_jeita_st *nopmi_chg_je
 
 	nopmi_chg_jeita->usb_psy = power_supply_get_by_name("usb");
 	if (!nopmi_chg_jeita->usb_psy) {
-		("usb supply not found, defer probe\n");
+		pr_err("usb supply not found, defer probe\n");
 		return -EINVAL;
 	}
 
 	ret = power_supply_get_property(nopmi_chg_jeita->usb_psy,
 				POWER_SUPPLY_PROP_PD_ACTIVE, &prop);
 	if (ret < 0) {
-		("couldn't get pd active property, ret=%d\n", ret);
+		pr_err("couldn't get pd active property, ret=%d\n", ret);
 		return -EINVAL;
 	}
 	pd_active = prop.intval;
-	("%s:get pd active: %d\n", __func__, prop.intval);
+	pr_err("%s:get pd active: %d\n", __func__, prop.intval);
 	return pd_active;
 }
 
@@ -116,18 +116,18 @@ static int nopmi_chg_jeita_get_charger_term_current(struct nopmi_chg_jeita_st *n
 
 	nopmi_chg_jeita->usb_psy = power_supply_get_by_name("usb");
 	if (!nopmi_chg_jeita->usb_psy) {
-		("usb supply not found, defer probe\n");
+		pr_err("usb supply not found, defer probe\n");
 		return -EINVAL;
 	}
 
 	ret = power_supply_get_property(nopmi_chg_jeita->usb_psy,
 				POWER_SUPPLY_PROP_TERM_CURRENT, &prop);
 	if (ret < 0) {
-		("couldn't get term_current property, ret=%d\n", ret);
+		pr_err("couldn't get term_current property, ret=%d\n", ret);
 		return -EINVAL;
 	}
 	term_curr = prop.intval;
-	("%s:get term_current: %d\n", __func__, prop.intval);
+	pr_err("%s:get term_current: %d\n", __func__, prop.intval);
 	return term_curr;
 }
 
@@ -135,20 +135,20 @@ static int nopmi_chg_jeita_set_charger_current(struct nopmi_chg_jeita_st *nopmi_
 {
 	union power_supply_propval prop = {0, };
 	int ret = 0;
-	("2021.09.10 wsy start %s:current is %d\n", __func__, cc);
+	pr_err("2021.09.10 wsy start %s:current is %d\n", __func__, cc);
 	nopmi_chg_jeita->bbc_psy = power_supply_get_by_name("bbc");
 	if (!nopmi_chg_jeita->bbc_psy) {
-		("bbc supply not found, defer probe\n");
+		pr_err("bbc supply not found, defer probe\n");
 		return -EINVAL;
 	}
 	prop.intval = cc;
 	ret = power_supply_set_property(nopmi_chg_jeita->bbc_psy,
 				POWER_SUPPLY_PROP_CURRENT_NOW, &prop);
 	if (ret < 0) {
-		("couldn't set current property, ret=%d\n", ret);
+		pr_err("couldn't set current property, ret=%d\n", ret);
 		return -EINVAL;
 	}
-	("2021.09.10 wsy end %s:current is %d\n", __func__, prop.intval);
+	pr_err("2021.09.10 wsy end %s:current is %d\n", __func__, prop.intval);
 	return 0;
 }
 
@@ -157,20 +157,20 @@ static int nopmi_chg_jeita_set_charger_voltage(struct nopmi_chg_jeita_st *nopmi_
 	union power_supply_propval prop = {0, };
 	int ret = 0;
 	
-	("2021.09.10 wsy start %s:voltage is %d\n", __func__, cv);
+	pr_err("2021.09.10 wsy start %s:voltage is %d\n", __func__, cv);
 	nopmi_chg_jeita->bbc_psy = power_supply_get_by_name("bbc");
 	if (!nopmi_chg_jeita->bbc_psy) {
-		("bbc supply not found, defer probe\n");
+		pr_err("bbc supply not found, defer probe\n");
 		return -EINVAL;
 	}
 	prop.intval = cv;
 	ret = power_supply_set_property(nopmi_chg_jeita->bbc_psy,
 				POWER_SUPPLY_PROP_VOLTAGE_NOW, &prop);
 	if (ret < 0) {
-		("couldn't set voltage property, ret=%d\n", ret);
+		pr_err("couldn't set voltage property, ret=%d\n", ret);
 		return -EINVAL;
 	}
-	("2021.09.10 wsy end %s:voltage is %d\n", __func__, prop.intval);
+	pr_err("2021.09.10 wsy end %s:voltage is %d\n", __func__, prop.intval);
 	return 0;
 }
 
@@ -181,17 +181,17 @@ static int nopmi_chg_jeita_set_charger_term_current(struct nopmi_chg_jeita_st *n
 
 	nopmi_chg_jeita->usb_psy = power_supply_get_by_name("usb");
 	if (!nopmi_chg_jeita->usb_psy) {
-		("usb supply not found, defer probe\n");
+		pr_err("usb supply not found, defer probe\n");
 		return -EINVAL;
 	}
 	prop.intval = term_curr;
 	ret = power_supply_set_property(nopmi_chg_jeita->usb_psy,
 				POWER_SUPPLY_PROP_TERM_CURRENT, &prop);
 	if (ret < 0) {
-		("couldn't set term_current property, ret=%d\n", ret);
+		pr_err("couldn't set term_current property, ret=%d\n", ret);
 		return -EINVAL;
 	}
-	("%s:set term_current is %d\n", __func__, prop.intval);
+	pr_err("%s:set term_current is %d\n", __func__, prop.intval);
 	return 0;
 }
 
@@ -201,20 +201,20 @@ static int nopmi_chg_jeita_set_charger_term_current(struct nopmi_chg_jeita_st *n
 	union power_supply_propval prop = {0, };
 	int ret = 0;
 	
-	("2021.09.10 wsy start %s:enabled is %d\n", __func__, enabled);
+	pr_err("2021.09.10 wsy start %s:enabled is %d\n", __func__, enabled);
 	nopmi_chg_jeita->bbc_psy = power_supply_get_by_name("bbc");
 	if (!nopmi_chg_jeita->bbc_psy) {
-		("bbc supply not found, defer probe\n");
+		pr_err("bbc supply not found, defer probe\n");
 		return -EINVAL;
 	}
 	prop.intval = enabled;
 	ret = power_supply_set_property(nopmi_chg_jeita->bbc_psy,
 				POWER_SUPPLY_PROP_CHARGE_ENABLED, &prop);
 	if (ret < 0) {
-		("couldn't set voltage enabled, ret=%d\n", ret);
+		pr_err("couldn't set voltage enabled, ret=%d\n", ret);
 		return -EINVAL;
 	}
-	("2021.09.10 wsy end %s:enabled is %d\n", __func__, prop.intval);
+	pr_err("2021.09.10 wsy end %s:enabled is %d\n", __func__, prop.intval);
 	return 0;
 
 }
@@ -237,19 +237,19 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 	sw_jeita->charging = true;
 	/* JEITA battery temp Standard */
 	if (nopmi_chg_jeita->battery_temp >= nopmi_chg_jeita->dt.temp_t4_thres) {
-		("[SW_JEITA] Battery Over high Temperature(%d) !!\n",
+		pr_err("[SW_JEITA] Battery Over high Temperature(%d) !!\n",
 			nopmi_chg_jeita->dt.temp_t4_thres);
 		sw_jeita->sm = TEMP_ABOVE_T4;
 		sw_jeita->charging = false;
 	} else if (nopmi_chg_jeita->battery_temp > nopmi_chg_jeita->dt.temp_t3_thres) {
 		/* control 45 degree to normal behavior */
 		if (nopmi_chg_jeita->battery_temp >= nopmi_chg_jeita->dt.temp_t4_thres_minus_x_degree) {
-			("[SW_JEITA] 4Battery Temperature between %d and %d,not allow charging yet!!\n",
+			pr_err("[SW_JEITA] 4Battery Temperature between %d and %d,not allow charging yet!!\n",
 				nopmi_chg_jeita->dt.temp_t4_thres_minus_x_degree,
 				nopmi_chg_jeita->dt.temp_t4_thres);
 			sw_jeita->charging = false;
 		} else {
-			("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+			pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 				nopmi_chg_jeita->dt.temp_t3_thres,
 				nopmi_chg_jeita->dt.temp_t4_thres);
 			sw_jeita->sm = TEMP_T3_TO_T4;
@@ -262,9 +262,9 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 		    || ((sw_jeita->sm == TEMP_T1P5_TO_T2)
 			&& (nopmi_chg_jeita->battery_temp
 			    <= nopmi_chg_jeita->dt.temp_t2_thres_plus_x_degree))) {
-			("[SW_JEITA] Battery Temperature not recovery to normal temperature charging mode yet!!\n");
+			pr_err("[SW_JEITA] Battery Temperature not recovery to normal temperature charging mode yet!!\n");
 		} else {
-			("[SW_JEITA] Battery Normal Temperature between %d and %d !!\n",
+			pr_err("[SW_JEITA] Battery Normal Temperature between %d and %d !!\n",
 				nopmi_chg_jeita->dt.temp_t2_thres,
 				nopmi_chg_jeita->dt.temp_t3_thres);
 			sw_jeita->sm = TEMP_T2_TO_T3;
@@ -276,22 +276,22 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 		    && (nopmi_chg_jeita->battery_temp
 			<= nopmi_chg_jeita->dt.temp_t1p5_thres_plus_x_degree)) {
 			if (sw_jeita->sm == TEMP_T1_TO_T1P5) {
-				("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+				pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 					nopmi_chg_jeita->dt.temp_t1p5_thres_plus_x_degree,
 					nopmi_chg_jeita->dt.temp_t2_thres);
 			}
 			if (sw_jeita->sm == TEMP_T0_TO_T1) {
-				("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+				pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 					nopmi_chg_jeita->dt.temp_t1_thres_plus_x_degree,
 					nopmi_chg_jeita->dt.temp_t1p5_thres);
 			}
 			if (sw_jeita->sm == TEMP_TN1_TO_T0) {
-				("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+				pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 					nopmi_chg_jeita->dt.temp_t0_thres_plus_x_degree,
 					nopmi_chg_jeita->dt.temp_tn1_thres);
 			}
 		} else {
-			("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+			pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 				nopmi_chg_jeita->dt.temp_t1p5_thres,
 				nopmi_chg_jeita->dt.temp_t2_thres);
 			sw_jeita->sm = TEMP_T1P5_TO_T2;
@@ -304,18 +304,18 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 			&& (nopmi_chg_jeita->battery_temp
 			<= nopmi_chg_jeita->dt.temp_t1_thres_plus_x_degree)) {
 			if (sw_jeita->sm == TEMP_T0_TO_T1) {
-				("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+				pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 					nopmi_chg_jeita->dt.temp_t1_thres_plus_x_degree,
 					nopmi_chg_jeita->dt.temp_t1p5_thres);
 			}
 			if (sw_jeita->sm == TEMP_BELOW_T0) {
-				("[SW_JEITA] 3Battery Temperature between %d and %d,not allow charging yet!!\n",
+				pr_err("[SW_JEITA] 3Battery Temperature between %d and %d,not allow charging yet!!\n",
 					nopmi_chg_jeita->dt.temp_tn1_thres,
 					nopmi_chg_jeita->dt.temp_tn1_thres_plus_x_degree);
 				sw_jeita->charging = false;
 			}
 		} else {
-			("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+			pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 				nopmi_chg_jeita->dt.temp_t1_thres,
 				nopmi_chg_jeita->dt.temp_t1p5_thres);
 			sw_jeita->sm = TEMP_T1_TO_T1P5;
@@ -327,17 +327,17 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 			&& (nopmi_chg_jeita->battery_temp
 			<= nopmi_chg_jeita->dt.temp_t0_thres_plus_x_degree)) {
 			if (sw_jeita->sm == TEMP_BELOW_T0) {
-				("[SW_JEITA] 2Battery Temperature between %d and %d,not allow charging yet!!\n",
+				pr_err("[SW_JEITA] 2Battery Temperature between %d and %d,not allow charging yet!!\n",
 					nopmi_chg_jeita->dt.temp_tn1_thres,
 					nopmi_chg_jeita->dt.temp_tn1_thres_plus_x_degree);
 				sw_jeita->charging = false;
 			} else if (sw_jeita->sm == TEMP_TN1_TO_T0) {
-				("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+				pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 					nopmi_chg_jeita->dt.temp_t0_thres_plus_x_degree,
 					nopmi_chg_jeita->dt.temp_tn1_thres);
 			}
 		} else {
-			("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+			pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 				nopmi_chg_jeita->dt.temp_t0_thres,
 				nopmi_chg_jeita->dt.temp_t1_thres);
 			sw_jeita->sm = TEMP_T0_TO_T1;
@@ -347,19 +347,19 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 		if ((sw_jeita->sm == TEMP_BELOW_T0)
 			&& (nopmi_chg_jeita->battery_temp
 			<= nopmi_chg_jeita->dt.temp_tn1_thres_plus_x_degree)) {
-			("[SW_JEITA] 1Battery Temperature between %d and %d,not allow charging yet!!\n",
+			pr_err("[SW_JEITA] 1Battery Temperature between %d and %d,not allow charging yet!!\n",
 				nopmi_chg_jeita->dt.temp_tn1_thres,
 				nopmi_chg_jeita->dt.temp_tn1_thres_plus_x_degree);
 			sw_jeita->charging = false;
 		} else {
-			("[SW_JEITA] Battery Temperature between %d and %d !!\n",
+			pr_err("[SW_JEITA] Battery Temperature between %d and %d !!\n",
 				nopmi_chg_jeita->dt.temp_t0_thres,
 				nopmi_chg_jeita->dt.temp_tn1_thres);
 			sw_jeita->sm = TEMP_TN1_TO_T0;
 			jeita_current_limit = nopmi_chg_jeita->dt.temp_tn1_to_t0_fcc;
 		}
 	} else {
-		("[SW_JEITA] Battery below low Temperature(%d) !!\n",
+		pr_err("[SW_JEITA] Battery below low Temperature(%d) !!\n",
 			nopmi_chg_jeita->dt.temp_t0_thres);
 		sw_jeita->sm = TEMP_BELOW_T0;
 		sw_jeita->charging = false;
@@ -378,7 +378,7 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 	if(nopmi_chg_jeita->bms_psy){
 		ret = power_supply_get_property(nopmi_chg_jeita->bms_psy, POWER_SUPPLY_PROP_FASTCHARGE_MODE, &prop);
 		if (ret < 0) {
-			("%s : get fastcharge mode fail\n",__func__);
+			pr_err("%s : get fastcharge mode fail\n",__func__);
 		}
 		fast_charge_mode = prop.intval;
 	}
@@ -431,17 +431,17 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 		ret = power_supply_get_property(sc8551_psy,
 				POWER_SUPPLY_PROP_CHARGING_ENABLED, &pval);
 		if (ret < 0) {
-			("bq2589x_charger:get sc8551_psy charge property enable error.\n");
+			pr_err("bq2589x_charger:get sc8551_psy charge property enable error.\n");
                 } else {
                 sc8551_charge_enable_flag = pval.intval;
-                ("bq2589x_charger:get sc8551_charge_enable_flag:%d\n", sc8551_charge_enable_flag);
+                pr_err("bq2589x_charger:get sc8551_charge_enable_flag:%d\n", sc8551_charge_enable_flag);
                 }
 	} else {
-                ("bq2589x_charger:sc8551_psy = power_supply_get_by_name(sc8551-standalone) error.\n");
+                pr_err("bq2589x_charger:sc8551_psy = power_supply_get_by_name(sc8551-standalone) error.\n");
         }
         if(sc8551_charge_enable_flag) { 
             if(NOPMI_CHARGER_IC_MAXIM != nopmi_get_charger_ic_type()) {
-                  ("bq2589x_charger:sc8551_psy :sw_jeita->cv = 4608.\n");
+                  pr_err("bq2589x_charger:sc8551_psy :sw_jeita->cv = 4608.\n");
 	          sw_jeita->cv = 4608;
             }
         }
@@ -459,7 +459,7 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 		} else {
 			ret = nopmi_chg_jeita_set_charger_voltage(nopmi_chg_jeita, sw_jeita->cv);
 			if (ret < 0)
-				("Couldn't set cv to %d, rc:%d\n", sw_jeita->cv, ret);
+				pr_err("Couldn't set cv to %d, rc:%d\n", sw_jeita->cv, ret);
 		}
 	}
 
@@ -487,7 +487,7 @@ static void nopmi_chg_handle_jeita_current(struct nopmi_chg_jeita_st *nopmi_chg_
 		if(sw_jeita->term_curr != term_curr_pre){
 			ret = nopmi_chg_jeita_set_charger_term_current(nopmi_chg_jeita, sw_jeita->term_curr);
 			if (ret < 0)
-				("Couldn't set term curr to %d, rc:%d\n", sw_jeita->term_curr, ret);
+				pr_err("Couldn't set term curr to %d, rc:%d\n", sw_jeita->term_curr, ret);
 		}
 	}
 }
@@ -542,7 +542,7 @@ static void nopmi_chg_jeita_workfunc(struct work_struct *work)
 	struct nopmi_chg_jeita_st *chg_jeita = container_of(work,
 		struct nopmi_chg_jeita_st, jeita_work.work);
 
-	("2021.09.10 wsy %s:\n",__func__);
+	pr_err("2021.09.10 wsy %s:\n",__func__);
 	chg_jeita->usb_present = nopmi_chg_is_usb_present(chg_jeita->usb_psy);
 	if (!chg_jeita->usb_present)
 		return;
@@ -600,7 +600,7 @@ static void nopmi_chg_jeita_state_init(struct nopmi_chg_jeita_st *nopmi_chg_jeit
 		else
 			sw_jeita->sm = TEMP_BELOW_T0;
 		
-		("[SW_JEITA] tmp:%d sm:%d\n",
+		pr_err("[SW_JEITA] tmp:%d sm:%d\n",
 			nopmi_chg_jeita->battery_temp, sw_jeita->sm);
 	}
 }
@@ -610,13 +610,13 @@ int nopmi_chg_jeita_init(struct nopmi_chg_jeita_st *nopmi_chg_jeita)
 	int rc = 0;
 	g_nopmi_chg_jeita = nopmi_chg_jeita;
 
-	("2021.09.10 wsy %s : start\n",__func__);
+	pr_err("2021.09.10 wsy %s : start\n",__func__);
 	
 	if (!nopmi_chg_jeita->sw_jeita ) {
 		nopmi_chg_jeita->sw_jeita = kmalloc(sizeof(struct sw_jeita_data), GFP_KERNEL);
 		if(!nopmi_chg_jeita->sw_jeita)
 		{
-			(" nopmi_chg_jeita_init Failed to allocate memory\n");
+			pr_err(" nopmi_chg_jeita_init Failed to allocate memory\n");
 			return -ENOMEM;
 		}
 	}
@@ -640,7 +640,7 @@ int nopmi_chg_jeita_deinit(struct nopmi_chg_jeita_st *nopmi_chg_jeita)
 	int rc = 0;
 	g_nopmi_chg_jeita = NULL;
 
-	("2021.09.10 wsy %s : start\n",__func__);
+	pr_err("2021.09.10 wsy %s : start\n",__func__);
 	
 	if (!nopmi_chg_jeita->sw_jeita ) {
 		cancel_delayed_work_sync(&nopmi_chg_jeita->jeita_work);
