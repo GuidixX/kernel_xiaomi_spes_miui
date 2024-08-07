@@ -442,10 +442,7 @@ static int32_t cam_flash_platform_probe(struct platform_device *pdev)
 	struct cam_flash_ctrl *fctrl     = NULL;
 	struct device_node *of_parent    = NULL;
 	struct cam_hw_soc_info *soc_info = NULL;
-/* Spes flashlight by muralivijay@github */
-#ifdef CONFIG_CAMERA_FLASH_SPES
-        struct device_node *gnode = pdev->dev.of_node; //store qcom-flash-gpios
-#endif
+
 
 	CAM_DBG(CAM_FLASH, "Enter");
 	if (!pdev->dev.of_node) {
@@ -600,25 +597,6 @@ free_resource:
 
 static struct led_classdev flashlight_led;
 
-static ssize_t brightness_show(struct device *dev, struct device_attribute *attr, char *buf)
-{
-	// Get the current brightness level (for simplicity, return 0 or 1)
-	return sprintf(buf, "%d\n", gpio_get_value(mgpio_flash_led.flash_now));
-}
-
-static ssize_t brightness_store(struct device *dev, struct device_attribute *attr, const char *buf, size_t count)
-{
-	int ret;
-	unsigned long value;
-
-	ret = kstrtoul(buf, 10, &value);
-	if (ret)
-		return ret;
-
-	// Set the GPIO based on the brightness value
-	gpio_set_value(mgpio_flash_led.flash_now, value ? 1 : 0);
-	return count;
-}
 
 static void flashlight_brightness_set(struct led_classdev *led_cdev, enum led_brightness brightness)
 {
@@ -630,8 +608,6 @@ static enum led_brightness flashlight_brightness_get(struct led_classdev *led_cd
 	return gpio_get_value(mgpio_flash_led.flash_now) ? LED_FULL : LED_OFF;
 }
 
-
-static DEVICE_ATTR(brightness, 0664, brightness_show, brightness_store);
 
 static int flashlight_probe(struct platform_device *pdev)
 {
@@ -654,12 +630,6 @@ static int flashlight_probe(struct platform_device *pdev)
 	}
 	CAM_INFO(CAM_FLASH, "flash_now GPIO: %d", mgpio_flash_led.flash_now);
 
-	// Create the sysfs entry
-	//ret = device_create_file(&pdev->dev, &dev_attr_brightness);
-	//if (ret) {
-		//CAM_ERR(CAM_FLASH, "Failed to create brightness sysfs entry");
-		//return ret;
-	//}
 	// Register LED class device
 	flashlight_led.name = "led:torch";
 	flashlight_led.brightness_set= flashlight_brightness_set;
@@ -672,13 +642,6 @@ static int flashlight_probe(struct platform_device *pdev)
 
 	return 0;
 }
-
-static int flashlight_remove(struct platform_device *pdev)
-{
-	led_classdev_unregister(&flashlight_led);
-	return 0;
-}
-
 
 static int32_t cam_flash_i2c_driver_probe(struct i2c_client *client,
 	const struct i2c_device_id *id)
@@ -800,15 +763,6 @@ static const struct of_device_id flashlight_of_match[] = {
 	{},
 };
 MODULE_DEVICE_TABLE(of, flashlight_of_match);
-
-static struct platform_driver flashlight_driver = {
-	.probe = flashlight_probe,
-	.remove = flashlight_remove,
-	.driver = {
-		.name = "flashlight",
-		.of_match_table = flashlight_of_match,
-	},
-};
 
 static struct platform_driver cam_flash_platform_driver = {
 	.probe = cam_flash_platform_probe,
