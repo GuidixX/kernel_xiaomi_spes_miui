@@ -10,4 +10,4 @@ __crc_cam_res_mgr_gpio_free = 0xdea608c8;
 __crc_cam_res_mgr_gpio_free_arry = 0x14434cb0;
 __crc_cam_res_mgr_gpio_set_value = 0x36ee6373;
 __crc_cam_res_mgr_shared_clk_config = 0xf838571e;
-__crc_cam_cci_dump_registers = 0x0e4f37ca;
+__crc_cam_cci_dump_registers = 0x05a7bc94;
