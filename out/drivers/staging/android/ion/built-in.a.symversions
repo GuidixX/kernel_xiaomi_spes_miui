@@ -1,6 +1,0 @@
-__crc_ion_walk_heaps = 0xc11e7f67;
-__crc_ion_alloc = 0xb4f3de9f;
-__crc_ion_device_add_heap = 0x9a7b411c;
-__crc_ion_device_create = 0x73025b87;
-__crc_ion_heap_create = 0x299fc8cd;
-__crc_ion_populate_vm_list = 0x52f16063;

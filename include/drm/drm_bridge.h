@@ -237,7 +237,8 @@ struct drm_bridge_funcs {
 	 * The enable callback is optional.
 	 */
 	void (*enable)(struct drm_bridge *bridge);
-
+	void (*disp_param_set)(struct drm_bridge *bridge, int cmd);
+	ssize_t (*disp_param_get)(struct drm_bridge *bridge, char *buf);
 	int (*disp_get_panel_info)(struct drm_bridge *bridge, char *name);
 };
 
@@ -296,6 +297,9 @@ struct drm_bridge {
 	const struct drm_bridge_funcs *funcs;
 	/** @driver_private: pointer to the bridge driver's internal context */
 	void *driver_private;
+	/* Xiaomi */
+	struct mutex lock;
+	bool is_dsi_drm_bridge;
 };
 
 void drm_bridge_add(struct drm_bridge *bridge);
@@ -316,6 +320,7 @@ void drm_bridge_mode_set(struct drm_bridge *bridge,
 			 struct drm_display_mode *adjusted_mode);
 void drm_bridge_pre_enable(struct drm_bridge *bridge);
 void drm_bridge_enable(struct drm_bridge *bridge);
+int dsi_bridge_interface_enable(int timeout);
 
 #ifdef CONFIG_DRM_PANEL_BRIDGE
 struct drm_bridge *drm_panel_bridge_add(struct drm_panel *panel,

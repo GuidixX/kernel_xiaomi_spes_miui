@@ -27,6 +27,7 @@
 #define DSI_CMD_PPS_SIZE 135
 
 #define DSI_MODE_MAX 32
+#define BUF_LEN_MAX    256
 
 /*
  * Defining custom dsi msg flag,
@@ -50,13 +51,6 @@ enum dsi_backlight_type {
 	DSI_BACKLIGHT_UNKNOWN,
 	DSI_BACKLIGHT_MAX,
 };
-
-#ifdef CONFIG_TARGET_PROJECT_K7T
-enum dsi_doze_mode_type {
-	DSI_DOZE_LPM = 0,
-	DSI_DOZE_HBM,
-};
-#endif
 
 enum bl_update_flag {
 	BL_UPDATE_DELAY_UNTIL_FIRST_FRAME,
@@ -182,6 +176,15 @@ struct drm_panel_esd_config {
 	int esd_err_irq_flags;
 };
 
+struct dsi_read_config {
+	bool enabled;
+	struct dsi_panel_cmd_set read_cmd;
+	u32 cmds_rlen;
+	u32 valid_bits;
+	u8 rbuf[64];
+
+};
+
 struct dsi_panel {
 	const char *name;
 	const char *type;
@@ -227,6 +230,9 @@ struct dsi_panel {
 	bool te_using_watchdog_timer;
 	struct dsi_qsync_capabilities qsync_caps;
 
+	bool dispparam_enabled;
+	u32 skip_dimmingon;
+
 	char dsc_pps_cmd[DSI_CMD_PPS_SIZE];
 	enum dsi_dms_mode dms_mode;
 
@@ -236,12 +242,15 @@ struct dsi_panel {
 	int power_mode;
 	enum dsi_panel_physical_type panel_type;
 
-#ifdef CONFIG_TARGET_PROJECT_K7T
-	bool doze_enabled;
-	enum dsi_doze_mode_type doze_mode;
-	u32 dsi_refresh_flag;
-#endif
-    int hbm_mode;
+	int hbm_mode;
+
+	u8 panel_read_data[BUF_LEN_MAX];
+	struct dsi_read_config xy_coordinate_cmds;
+
+	bool in_aod; /* set  DISPPARAM_DOZE_BRIGHTNESS_HBM/LBM only in AOD */
+	bool nolp_command_set_backlight_enabled;
+	bool oled_panel_video_mode;
+
 };
 
 static inline bool dsi_panel_ulps_feature_enabled(struct dsi_panel *panel)
@@ -362,14 +371,31 @@ void dsi_panel_ext_bridge_put(struct dsi_panel *panel);
 void dsi_panel_calc_dsi_transfer_time(struct dsi_host_common_cfg *config,
 		struct dsi_display_mode *mode, u32 frame_threshold_us);
 
-#ifdef CONFIG_TARGET_PROJECT_K7T
-int dsi_panel_set_doze_status(struct dsi_panel *panel, bool status);
-int dsi_panel_set_doze_mode(struct dsi_panel *panel, enum dsi_doze_mode_type mode);
+int dsi_panel_get_cmd_pkt_count(const char *data, u32 length, u32 *cnt);
 
-void dsi_set_backlight_control(struct dsi_panel *panel,
-			 struct dsi_display_mode *adj_mode);
+int dsi_panel_alloc_cmd_packets(struct dsi_panel_cmd_set *cmd,
+				u32 packet_count);
 
-#endif
+int dsi_panel_create_cmd_packets(const char *data,
+				u32 length,
+				u32 count,
+				struct dsi_cmd_desc *cmd);
+
+void dsi_panel_destroy_cmd_packets(struct dsi_panel_cmd_set *set);
+
+void dsi_panel_dealloc_cmd_packets(struct dsi_panel_cmd_set *set);
+
+int dsi_panel_write_cmd_set(struct dsi_panel *panel,
+				struct dsi_panel_cmd_set *cmd_sets);
+
+int dsi_panel_read_cmd_set(struct dsi_panel *panel,
+				struct dsi_read_config *read_config);
+
+ssize_t dsi_panel_mipi_reg_write(struct dsi_panel *panel,
+				char *buf, size_t count);
+
+ssize_t dsi_panel_mipi_reg_read(struct dsi_panel *panel,
+				char *buf);
 
 int dsi_panel_apply_hbm_mode(struct dsi_panel *panel);
 

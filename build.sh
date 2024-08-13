@@ -24,26 +24,26 @@ if ! [ -d "$TC_DIR" ]; then
 	fi
 fi
 
-if [[ $1 = "-r" || $1 = "--regen" ]]; then
-	make O=out ARCH=arm64 $DEFCONFIG savedefconfig
-	cp out/defconfig arch/arm64/configs/$DEFCONFIG
-	echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
-	exit
-fi
+#if [[ $1 = "-r" || $1 = "--regen" ]]; then
+#	make O=out ARCH=arm64 $DEFCONFIG savedefconfig
+#	cp out/defconfig arch/arm64/configs/$DEFCONFIG
+#	echo -e "\nSuccessfully regenerated defconfig at $DEFCONFIG"
+#	exit
+#fi
 
-if [[ $1 = "-rf" || $1 = "--regen-full" ]]; then
-	make O=out ARCH=arm64 $DEFCONFIG
-	cp out/.config arch/arm64/configs/$DEFCONFIG
-	echo -e "\nSuccessfully regenerated full defconfig at $DEFCONFIG"
-	exit
-fi
+#if [[ $1 = "-rf" || $1 = "--regen-full" ]]; then
+#	make O=out ARCH=arm64 $DEFCONFIG
+#	cp out/.config arch/arm64/configs/$DEFCONFIG
+#	echo -e "\nSuccessfully regenerated full defconfig at $DEFCONFIG"
+#	exit
+#fi
 
 if [[ $1 = "-c" || $1 = "--clean" ]]; then
 	rm -rf out
 fi
 
-mkdir -p out
-make O=out ARCH=arm64 $DEFCONFIG
+#mkdir -p out
+#make O=out ARCH=arm64 $DEFCONFIG
 
 echo -e "\nStarting compilation...\n"
 make -j$(nproc --all) O=out ARCH=arm64 CC=clang LD=ld.lld AS=llvm-as AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy OBJDUMP=llvm-objdump STRIP=llvm-strip CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi- LLVM=1 LLVM_IAS=1 Image.gz dtbo.img

@@ -1,9 +1,0 @@
-__crc_xhci_run = 0x6ac67745;
-__crc_xhci_shutdown = 0x8b09c09d;
-__crc_xhci_suspend = 0x4f66d00c;
-__crc_xhci_resume = 0x37523ea2;
-__crc_xhci_gen_setup = 0x947b42ca;
-__crc_xhci_init_driver = 0xf67a45bd;
-__crc_xhci_ext_cap_init = 0x24894470;
-__crc_xhci_dbg_trace = 0x3707a105;
-__crc___tracepoint_xhci_dbg_quirks = 0x3069809a;
